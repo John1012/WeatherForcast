@@ -16,6 +16,8 @@ data class WeatherUI(
     val timestamp: Long,
     val weatherType: String,
     val icon: String,
+    val temp: Double,
+    val feelsLike: Double,
 )
 
 class FetchWeatherForecastByCityUseCase @Inject constructor(
@@ -30,12 +32,16 @@ class FetchWeatherForecastByCityUseCase @Inject constructor(
                 timestamp = requireNotNull(current.dt) { "current timestamp is null" },
                 weatherType = requireNotNull(current.weather?.first()?.main) { "current weather type is null" },
                 icon = requireNotNull(current.weather.first().icon) { "current icon is null" },
+                temp = requireNotNull(current.main?.temp) { "current temp is null" },
+                feelsLike = requireNotNull(current.main?.feelsLike) { "current feelsLike is null" },
             ),
             forecastList = forecast.list?.mapIndexed{ idx, item ->
                 WeatherUI(
                     timestamp = requireNotNull(item.dt) { "The $idx timestamp is null" },
                     weatherType = requireNotNull(item.weather?.first()?.main) { "The $idx weather type is null" },
                     icon = requireNotNull(item.weather.first().icon) { "The $idx icon is null" },
+                    temp = requireNotNull(item.main?.temp) { "The $idx temp is null" },
+                    feelsLike = requireNotNull(item.main?.feelsLike) { "The $idx feelsLike is null" },
                 )
             } ?: throw Exception("forecast list is null")
         )
