@@ -50,9 +50,9 @@ import com.assignment.john.ui.theme.WeatherForecastTheme
 import com.assignment.john.usecase.WeatherForecastUI
 import com.assignment.john.usecase.WeatherUI
 import dagger.hilt.android.AndroidEntryPoint
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 @AndroidEntryPoint
@@ -371,8 +371,6 @@ fun ErrorScreenPreview() {
 }
 
 fun Long.formatTimestamp(): String {
-    val instant = Instant.ofEpochSecond(this)
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        .withZone(ZoneId.systemDefault())
-    return formatter.format(instant)
+    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    return formatter.format(Date(this * 1000))
 }
