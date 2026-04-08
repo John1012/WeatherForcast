@@ -53,7 +53,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.random.Random
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -206,6 +205,8 @@ fun CurrentWeather(current: WeatherUI) {
             timestamp = current.timestamp,
             weatherType = current.weatherType,
             icon = current.icon,
+            temp = current.temp,
+            feelsLike = current.feelsLike,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -240,6 +241,8 @@ fun ForecastList(
                     timestamp = item.timestamp,
                     weatherType = item.weatherType,
                     icon = item.icon,
+                    temp = item.temp,
+                    feelsLike = item.feelsLike,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -247,26 +250,28 @@ fun ForecastList(
     }
 }
 
+fun weatherColor(weatherType: String): Color = when (weatherType.lowercase()) {
+    "clear" -> Color(0xFFFFB300)
+    "clouds" -> Color(0xFF607D8B)
+    "rain", "drizzle" -> Color(0xFF1565C0)
+    "thunderstorm" -> Color(0xFF4A148C)
+    "snow" -> Color(0xFF81D4FA)
+    "mist", "fog", "haze", "smoke", "dust", "sand", "ash", "squall", "tornado" -> Color(0xFF78909C)
+    else -> Color(0xFF455A64)
+}
+
 @Composable
 fun WeatherItem(
     timestamp: Long,
     weatherType: String,
     icon: String,
+    temp: Double,
+    feelsLike: Double,
     modifier: Modifier = Modifier
 ) {
-    val randomColor by remember {
-        mutableStateOf(
-            Color(
-                red = Random.nextFloat(),
-                green = Random.nextFloat(),
-                blue = Random.nextFloat(),
-                alpha = 1f
-            )
-        )
-    }
-
+    val baseColor = weatherColor(weatherType)
     val gradientBrush = Brush.linearGradient(
-        colors = listOf(randomColor.copy(alpha = 0.4f), randomColor),
+        colors = listOf(baseColor.copy(alpha = 0.4f), baseColor),
         start = androidx.compose.ui.geometry.Offset.Zero,
         end = androidx.compose.ui.geometry.Offset.Infinite
     )
@@ -278,7 +283,7 @@ fun WeatherItem(
             .clip(MaterialTheme.shapes.medium)
             .border(
                 width = 2.dp,
-                color = randomColor,
+                color = baseColor,
                 shape = MaterialTheme.shapes.medium
             )
             .background(gradientBrush)
@@ -296,6 +301,11 @@ fun WeatherItem(
             Text(
                 text = weatherType,
                 style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+            Text(
+                text = "${temp.toInt()}°C  feels like ${feelsLike.toInt()}°C",
+                style = MaterialTheme.typography.bodyMedium,
                 color = Color.White
             )
             Text(
@@ -328,11 +338,13 @@ fun MainContentPreview() {
                 currentWeather = WeatherUI(
                     timestamp = 1766731902,
                     weatherType = "Clouds",
-                    icon = "10d"
+                    icon = "10d",
+                    temp = 18.0,
+                    feelsLike = 16.0,
                 ),
                 forecastList = listOf(
-                    WeatherUI(1766741902, "Rain", "09d"),
-                    WeatherUI(1766751902, "Clear", "01d")
+                    WeatherUI(1766741902, "Rain", "09d", temp = 14.0, feelsLike = 12.0),
+                    WeatherUI(1766751902, "Clear", "01d", temp = 22.0, feelsLike = 21.0),
                 ),
             )
         )
