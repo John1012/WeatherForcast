@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -129,8 +130,8 @@ fun MainContent(
             onCitySelected = onCitySelected,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        content.weatherForecast?.currentWeather?.let {
-            CurrentWeather(it)
+        content.weatherForecast?.let {
+            CurrentWeather(it.currentWeather, it.city)
         }
         Spacer(modifier = Modifier.height(16.dp))
         content.weatherForecast?.forecastList?.let {
@@ -190,26 +191,68 @@ fun CityDropdownMenu(
 }
 
 @Composable
-fun CurrentWeather(current: WeatherUI) {
+fun CurrentWeather(current: WeatherUI, cityName: String) {
+    val baseColor = weatherColor(current.weatherType)
+    val gradientBrush = Brush.linearGradient(
+        colors = listOf(baseColor.copy(alpha = 0.3f), baseColor.copy(alpha = 0.8f)),
+        start = androidx.compose.ui.geometry.Offset.Zero,
+        end = androidx.compose.ui.geometry.Offset.Infinite
+    )
+
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(MaterialTheme.shapes.large)
+            .border(width = 2.dp, color = baseColor, shape = MaterialTheme.shapes.large)
+            .background(gradientBrush)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "Current",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = Color.White
+            text = cityName,
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.White.copy(alpha = 0.85f),
         )
-        WeatherItem(
-            timestamp = current.timestamp,
-            weatherType = current.weatherType,
-            icon = current.icon,
-            temp = current.temp,
-            feelsLike = current.feelsLike,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+        AsyncImage(
+            model = "https://openweathermap.org/img/wn/${current.icon}@2x.png",
+            contentDescription = "天氣圖標",
+            placeholder = painterResource(R.drawable.placeholder),
+            modifier = Modifier.size(96.dp)
+        )
+        Text(
+            text = "${current.temp.toInt()}°C",
+            style = MaterialTheme.typography.displayMedium,
+            color = Color.White,
+        )
+        Text(
+            text = current.weatherType,
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.White.copy(alpha = 0.9f),
+        )
+        Text(
+            text = "Feels like ${current.feelsLike.toInt()}°C",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.75f),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "💧 Humidity", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                Text(text = "${current.humidity}%", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "💨 Wind", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                Text(text = "${current.windSpeed} m/s", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            }
+        }
+        Text(
+            text = current.timestamp.formatTimestamp(),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.6f),
         )
     }
 }
@@ -341,10 +384,12 @@ fun MainContentPreview() {
                     icon = "10d",
                     temp = 18.0,
                     feelsLike = 16.0,
+                    humidity = 82,
+                    windSpeed = 4.2,
                 ),
                 forecastList = listOf(
-                    WeatherUI(1766741902, "Rain", "09d", temp = 14.0, feelsLike = 12.0),
-                    WeatherUI(1766751902, "Clear", "01d", temp = 22.0, feelsLike = 21.0),
+                    WeatherUI(1766741902, "Rain", "09d", temp = 14.0, feelsLike = 12.0, humidity = 90, windSpeed = 5.1),
+                    WeatherUI(1766751902, "Clear", "01d", temp = 22.0, feelsLike = 21.0, humidity = 55, windSpeed = 2.3),
                 ),
             )
         )
